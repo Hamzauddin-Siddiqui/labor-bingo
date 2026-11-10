@@ -180,7 +180,7 @@
   "use strict";
   // >>> Paste the Google Apps Script web app URL between the quotes (ends in /exec). <<<
   // Then every request lands as a new row in the tracking sheet. Left empty, the page uses the email app instead.
-  var FORM_ENDPOINT = "" || window.__labEndpoint || "";
+  var FORM_ENDPOINT = "https://script.google.com/macros/s/AKfycbxrMX6uhoLcJnFCgPQmCzYhQvaIpzOt2ctjx9ra6-bzdLXmDj92kDfA3S4tLBAwNx_FSg/exec" || window.__labEndpoint || "";
   var MAIL_TO = "info@alphadent.io";
   function openMail(url) { (window.__labOpenMail || function (u) { window.location.href = u; })(url); }
 

@@ -1,0 +1,394 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Labor-Bingo · Alphadent</title>
+<meta name="description" content="Labor-Bingo fürs Pausenzimmer: Kreuzt an, was euch diese Woche passiert ist, und fragt einen einzigen Testfall an. Kein Laborwechsel.">
+<meta name="robots" content="noindex">
+<style>
+  :root {
+    --yellow: #FFD84D;
+    --ink: #111111;
+    --paper: #FFFBEA;
+    --muted: #5b5333;
+    --line: #111111;
+    --done: #111111;
+    --done-text: #FFD84D;
+    --focus: #1d4ed8;
+  }
+  * { box-sizing: border-box; }
+  html { -webkit-text-size-adjust: 100%; }
+  body { margin: 0; background: var(--yellow); color: var(--ink);
+         font-family: Inter, system-ui, -apple-system, "Segoe UI", sans-serif; font-size: 16px; line-height: 1.45; }
+  .wrap { max-width: 560px; margin: 0 auto; padding: 20px 16px 40px; }
+  header { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+  .logo { font-weight: 800; font-size: 20px; letter-spacing: -0.02em; }
+  .team { font-size: 13px; font-weight: 600; white-space: nowrap; }
+  h1 { font-size: 40px; line-height: 1; letter-spacing: -0.03em; font-weight: 800; margin: 22px 0 6px; }
+  .tag { font-style: italic; font-weight: 700; margin: 0; }
+  .lead { margin: 10px 0 0; }
+  .grid { display: grid; grid-template-columns: repeat(4, 1fr); border: 3px solid var(--line); margin-top: 18px;
+          background: var(--yellow); }
+  .sq { appearance: none; border: 1.5px solid var(--line); background: transparent; color: var(--ink);
+        font: inherit; font-weight: 700; font-size: 12.5px; line-height: 1.2; min-height: 84px; padding: 6px 4px;
+        cursor: pointer; display: flex; align-items: center; justify-content: center; text-align: center;
+        overflow-wrap: normal; hyphens: manual; position: relative; }
+  .sq[aria-pressed="true"] { background: var(--done); color: var(--done-text); }
+  .sq.win { text-decoration: underline; text-decoration-thickness: 2px; text-underline-offset: 3px; }
+  .sq:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible, a:focus-visible {
+        outline: 3px solid var(--focus); outline-offset: 2px; }
+  .status { min-height: 24px; font-weight: 700; margin: 12px 0 0; }
+  .reset { background: none; border: 0; padding: 0; font: inherit; font-size: 14px; text-decoration: underline; cursor: pointer; color: var(--ink); }
+  section.card { background: var(--paper); border: 3px solid var(--line); padding: 18px 16px; margin-top: 26px; }
+  h2 { font-size: 24px; line-height: 1.1; letter-spacing: -0.02em; margin: 0 0 8px; font-weight: 800; }
+  .card p { margin: 8px 0 0; }
+  fieldset { border: 0; padding: 0; margin: 16px 0 0; }
+  legend { font-weight: 700; padding: 0; margin-bottom: 8px; }
+  .choice { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .choice label { border: 2px solid var(--line); padding: 10px; font-weight: 700; font-size: 14px; cursor: pointer;
+                  display: flex; gap: 8px; align-items: flex-start; background: #fff; }
+  .choice input { margin-top: 3px; accent-color: var(--ink); }
+  label.f { display: block; font-weight: 600; font-size: 14px; margin-top: 14px; }
+  .f span.opt { font-weight: 400; color: var(--muted); }
+  input[type=text], input[type=email], input[type=tel], select, textarea {
+    width: 100%; margin-top: 4px; padding: 11px 10px; font: inherit; border: 2px solid var(--line); border-radius: 0;
+    background: #fff; color: var(--ink); }
+  textarea { min-height: 80px; resize: vertical; }
+  input, select, textarea { font-weight: 400; }
+  .hint { font-size: 13px; color: var(--muted); margin-top: 4px; }
+  .err { color: #9b1c1c; font-weight: 700; font-size: 14px; margin-top: 10px; min-height: 20px; }
+  .btn { display: block; width: 100%; margin-top: 18px; padding: 14px; font: inherit; font-weight: 800; font-size: 17px;
+         background: var(--ink); color: var(--yellow); border: 0; cursor: pointer; }
+  .call { display: block; text-align: center; margin-top: 10px; font-weight: 700; color: var(--ink); }
+  .done { display: none; }
+  .done.show { display: block; }
+  ul.facts { margin: 10px 0 0; padding-left: 20px; }
+  ul.facts li { margin-bottom: 6px; }
+  .privacy { font-size: 13px; color: var(--muted); margin-top: 14px; }
+  footer { font-size: 12.5px; margin-top: 28px; line-height: 1.5; }
+  footer a { color: var(--ink); }
+  @media (max-width: 400px) { .sq { font-size: 11.5px; padding: 6px 2px; } }
+  @media (min-width: 480px) { .sq { font-size: 14px; min-height: 96px; } h1 { font-size: 48px; } }
+  @media (prefers-reduced-motion: no-preference) { .sq { transition: background .12s, color .12s; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="logo">Alphadent</div>
+    <div class="team" id="teamLabel" hidden></div>
+  </header>
+
+  <h1>Labor-Bingo</h1>
+  <p class="tag">fürs Pausenzimmer</p>
+  <p class="lead">Tippt an, was euch diese Woche passiert ist. Vier in einer Reihe, Spalte oder Diagonale: Bingo!</p>
+
+  <div class="grid" id="grid" role="group" aria-label="Labor-Bingo, 4 mal 4 Felder"></div>
+  <p class="status" id="status" aria-live="polite"></p>
+  <button class="reset" id="reset" type="button">Alle Kreuze löschen</button>
+
+  <section class="card" aria-labelledby="formTitle">
+    <h2 id="formTitle">Ein Fall. Kein Laborwechsel.</h2>
+    <p>Ihr behaltet euer Labor und schickt uns einen einzigen Testfall, ganz normal aus eurer Scanner-Software. Euer Scan ist eine Datei: Wenn euer Labor einmal nicht kann, ist er in Minuten bei uns.</p>
+
+    <form id="form" novalidate>
+      <fieldset>
+        <legend>Was möchtet ihr?</legend>
+        <div class="choice">
+          <label><input type="radio" name="kind" value="test" checked> Testfall anfragen</label>
+          <label><input type="radio" name="kind" value="feedback"> Nur verraten, was nervt</label>
+        </div>
+      </fieldset>
+
+      <label class="f" for="pain">Welches Feld nervt euch am meisten?
+        <select id="pain" name="pain"><option value="">Bitte wählen</option></select>
+      </label>
+
+      <label class="f" for="praxis">Praxis
+        <input id="praxis" name="praxis" type="text" autocomplete="organization">
+      </label>
+
+      <label class="f" for="name">Ansprechperson <span class="opt">(optional)</span>
+        <input id="name" name="name" type="text" autocomplete="name">
+      </label>
+
+      <div id="testFields">
+        <label class="f" for="contact">Telefon oder E-Mail für Rückfragen
+          <input id="contact" name="contact" type="text" autocomplete="email" inputmode="email">
+        </label>
+        <label class="f" for="scanner">Welchen Scanner nutzt ihr? <span class="opt">(optional)</span>
+          <select id="scanner" name="scanner">
+            <option value="">Bitte wählen</option>
+            <option>3Shape</option><option>Medit</option><option>iTero</option><option>Dentsply Sirona</option>
+            <option>Dexis</option><option>AlliedStar</option><option>Anderer</option><option>Weiß ich nicht</option>
+          </select>
+        </label>
+      </div>
+
+      <label class="f" for="msg">Noch etwas? <span class="opt">(optional)</span>
+        <textarea id="msg" name="msg"></textarea>
+      </label>
+
+      <div class="err" id="err" role="alert"></div>
+      <button class="btn" type="submit" id="submit">Testfall anfragen</button>
+      <a class="call" href="tel:+4915123947703">Lieber telefonieren: +49 1512 3947703</a>
+
+      <p class="privacy">Diese Seite speichert eure Angaben nicht und setzt keine Cookies. Beim Absenden öffnet sich euer E-Mail-Programm mit einer fertigen Nachricht an info@alphadent.io; ihr entscheidet, ob ihr sie abschickt. Eure Kreuze im Bingo merkt sich nur euer eigener Browser. Umfang und Konditionen des Testfalls stimmen wir vorab mit euch ab.</p>
+    </form>
+
+    <div class="done" id="done" role="status">
+      <h2>Danke!</h2>
+      <p id="doneText">Euer E-Mail-Programm sollte sich jetzt mit der fertigen Nachricht geöffnet haben. Einfach abschicken, wir melden uns innerhalb eines Werktags.</p>
+      <div id="fallback">
+        <p><b>Hat sich nichts geöffnet?</b> Das passiert oft am Praxis-PC mit Webmail. Kopiert einfach die fertige Nachricht und schickt sie an <a href="mailto:info@alphadent.io">info@alphadent.io</a>, oder ruft an: <a href="tel:+4915123947703">+49 1512 3947703</a> (Mo–Fr 8–18 Uhr).</p>
+        <label class="f" for="copyText">Eure Nachricht
+          <textarea id="copyText" readonly rows="9"></textarea>
+        </label>
+        <button class="btn" type="button" id="copyBtn">Nachricht kopieren</button>
+        <p class="hint" id="copyStatus" aria-live="polite"></p>
+      </div>
+      <button class="reset" type="button" id="backBtn">Zurück zum Formular</button>
+    </div>
+  </section>
+
+  <section class="card" aria-labelledby="factsTitle">
+    <h2 id="factsTitle">Für die Chefetage: Alphadent in 30 Sekunden</h2>
+    <ul class="facts">
+      <li>Digitales Dentallabor aus Hannover, meistergeführt</li>
+      <li>Aufträge direkt aus der Scanner-Software</li>
+      <li>3D-Freigabe jeder Arbeit vor der Fertigung</li>
+      <li>KI-Prüfung von Passung, Okklusion und Kontaktpunkten vor dem Versand</li>
+      <li>Passgarantie: kostenlose, prioritäre Neuanfertigung (Meldung binnen 5 Werktagen)</li>
+      <li>Plattform kostenlos: keine Einrichtungs- oder Monatsgebühr, keine Mindestabnahme</li>
+      <li>Konto in der Regel in 24 bis 48 Stunden eingerichtet</li>
+      <li>Express-Option: 24 Stunden früher, nach Absprache</li>
+    </ul>
+  </section>
+
+  <footer>
+    Bingo-Foto? Postet es in eurer Story und markiert <b>@alphadentlabs</b>, bitte ohne Patientendaten im Bild.<br><br>
+    Konzept-Entwurf von Hamzauddin Siddiqui im Rahmen einer Bewerbung bei der Alphadent GmbH. Keine offizielle Seite der Alphadent GmbH. Beim Start zieht sie unter alphadent.io/bingo um und erhält dort Impressum und Datenschutzhinweise der Alphadent GmbH.
+  </footer>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  // Optional: set to a form backend URL (e.g. a Tally or Formspree endpoint owned by Alphadent) to submit
+  // directly instead of opening the email app. Leave empty to use the email fallback.
+  var FORM_ENDPOINT = "";
+  var MAIL_TO = "info@alphadent.io";
+  function openMail(url) { (window.__labOpenMail || function (u) { window.location.href = u; })(url); }
+
+  var SQUARES = [
+    "„Ist schon unterwegs!“", "Patient:in da, Arbeit nicht", "3 Tage auf den KVA gewartet", "Krone passt nicht",
+    "„Welche Farbe war das?“", "Laborzettel unleserlich", "Joker: Kaffee wieder kalt", "3 Anrufe, 3 Antworten",
+    "Scan geschickt, Labor will Abdruck", "„Ist die Arbeit schon da?“", "Express? Leider erst nächste Woche", "Rechnung ≠ KVA",
+    "Warteschleife mitsingen", "„Das schleifen wir ein.“", "Scan unbrauchbar, Patient:in weg", "Zum 3. Mal umbestellt"
+  ];
+  var JOKER = 6;
+  var LINES = [];
+  for (var r = 0; r < 4; r++) LINES.push([r * 4, r * 4 + 1, r * 4 + 2, r * 4 + 3]);
+  for (var c = 0; c < 4; c++) LINES.push([c, c + 4, c + 8, c + 12]);
+  LINES.push([0, 5, 10, 15]); LINES.push([3, 6, 9, 12]);
+
+  // Team code from the printed QR code (?t=H-01). Only accept the expected format.
+  var team = "";
+  try {
+    var t = new URLSearchParams(window.location.search).get("t") || "";
+    if (/^[HP]-\d{2}$/.test(t)) team = t;
+  } catch (e) { team = ""; }
+  if (team) { var tl = document.getElementById("teamLabel"); tl.textContent = "Team-Code " + team; tl.hidden = false; }
+
+  var KEY = "laborbingo:" + (team || "web");
+  var state = new Array(16).fill(false);
+  try {
+    var saved = JSON.parse(window.localStorage.getItem(KEY) || "null");
+    if (Array.isArray(saved) && saved.length === 16) state = saved.map(Boolean);
+  } catch (e) { /* storage unavailable: start fresh */ }
+  state[JOKER] = true;
+
+  var grid = document.getElementById("grid");
+  var statusEl = document.getElementById("status");
+  var pain = document.getElementById("pain");
+  var buttons = [];
+
+  SQUARES.forEach(function (label, i) {
+    var b = document.createElement("button");
+    b.type = "button";
+    b.className = "sq";
+    b.textContent = label;
+    b.setAttribute("aria-pressed", String(state[i]));
+    if (i === JOKER) b.setAttribute("aria-label", label + " (Joker, immer angekreuzt)");
+    b.addEventListener("click", function () {
+      if (i === JOKER) return;
+      state[i] = !state[i];
+      render();
+      save();
+    });
+    grid.appendChild(b);
+    buttons.push(b);
+  });
+
+  function save() {
+    try { window.localStorage.setItem(KEY, JSON.stringify(state)); } catch (e) { /* ignore */ }
+  }
+
+  function render() {
+    var winning = {};
+    var wins = 0;
+    LINES.forEach(function (line) {
+      if (line.every(function (i) { return state[i]; })) {
+        wins++;
+        line.forEach(function (i) { winning[i] = true; });
+      }
+    });
+    buttons.forEach(function (b, i) {
+      b.setAttribute("aria-pressed", String(state[i]));
+      b.classList.toggle("win", !!winning[i]);
+    });
+    var ticked = state.filter(Boolean).length - 1;
+    if (wins > 0) statusEl.textContent = "Bingo! Dann wird es Zeit für einen Testfall.";
+    else if (ticked > 0) statusEl.textContent = ticked + (ticked === 1 ? " Feld" : " Felder") + " angekreuzt.";
+    else statusEl.textContent = "";
+    fillPain();
+  }
+
+  function fillPain() {
+    var current = pain.value;
+    while (pain.options.length > 1) pain.remove(1);
+    var order = [];
+    SQUARES.forEach(function (s, i) { if (i !== JOKER && state[i]) order.push(i); });
+    SQUARES.forEach(function (s, i) { if (i !== JOKER && !state[i]) order.push(i); });
+    order.forEach(function (i) {
+      var o = document.createElement("option");
+      o.value = SQUARES[i];
+      o.textContent = (state[i] ? "✓ " : "") + SQUARES[i];
+      pain.appendChild(o);
+    });
+    pain.value = current;
+  }
+
+  document.getElementById("reset").addEventListener("click", function () {
+    state = new Array(16).fill(false);
+    state[JOKER] = true;
+    render();
+    save();
+  });
+
+  // Form
+  var form = document.getElementById("form");
+  var err = document.getElementById("err");
+  var testFields = document.getElementById("testFields");
+  var submit = document.getElementById("submit");
+
+  function kind() { return form.querySelector('input[name="kind"]:checked').value; }
+  function syncKind() {
+    var isTest = kind() === "test";
+    testFields.hidden = !isTest;
+    submit.textContent = isTest ? "Testfall anfragen" : "Abschicken";
+  }
+  form.querySelectorAll('input[name="kind"]').forEach(function (el) { el.addEventListener("change", syncKind); });
+
+  form.addEventListener("input", function () { err.textContent = ""; });
+
+  form.addEventListener("submit", function (ev) {
+    ev.preventDefault();
+    err.textContent = "";
+    var data = {
+      kind: kind(),
+      team: team || "ohne Code",
+      pain: pain.value,
+      praxis: form.praxis.value.trim(),
+      name: form.name.value.trim(),
+      contact: form.contact.value.trim(),
+      scanner: form.scanner.value,
+      msg: form.msg.value.trim(),
+      ticked: SQUARES.filter(function (s, i) { return i !== JOKER && state[i]; })
+    };
+    if (!data.praxis) { err.textContent = "Bitte den Namen der Praxis angeben."; form.praxis.focus(); return; }
+    if (data.kind === "test" && !data.contact) {
+      err.textContent = "Bitte Telefon oder E-Mail angeben, damit wir uns melden können."; form.contact.focus(); return;
+    }
+    if (data.kind === "feedback" && !data.pain) {
+      err.textContent = "Bitte wählt das Feld, das am meisten nervt."; pain.focus(); return;
+    }
+
+    var subject = "Labor-Bingo " + data.team + ": " + (data.kind === "test" ? "Testfall-Anfrage" : "Feedback");
+    var details = [
+      "Praxis: " + data.praxis,
+      data.name ? "Ansprechperson: " + data.name : "",
+      data.contact ? "Kontakt: " + data.contact : "",
+      data.scanner ? "Scanner: " + data.scanner : "",
+      "Nervt am meisten: " + (data.pain || "-"),
+      "Angekreuzt: " + (data.ticked.length ? data.ticked.join("; ") : "-"),
+      data.msg ? "Nachricht: " + data.msg : "",
+      "Team-Code: " + data.team
+    ].filter(Boolean);
+    var lines = ["Hallo Alphadent-Team,", "",
+      data.kind === "test" ? "wir möchten einen einzigen Testfall anfragen." : "hier unser Labor-Bingo-Feedback.", ""]
+      .concat(details, ["", "Viele Grüße"]);
+
+    function showDone(withFallback) {
+      document.getElementById("fallback").hidden = !withFallback;
+      document.getElementById("copyText").value = "An: " + MAIL_TO + "\nBetreff: " + subject + "\n\n" + lines.join("\n");
+      document.getElementById("copyStatus").textContent = "";
+      form.style.display = "none";
+      document.getElementById("done").classList.add("show");
+      document.getElementById("done").scrollIntoView({ behavior: "smooth", block: "start" });
+    }
+
+    if (FORM_ENDPOINT) {
+      submit.disabled = true;
+      fetch(FORM_ENDPOINT, { method: "POST", headers: { "Content-Type": "application/json", "Accept": "application/json" },
+                             body: JSON.stringify(data) })
+        .then(function (res) {
+          if (!res.ok) throw new Error(String(res.status));
+          document.getElementById("doneText").textContent = "Eure Nachricht ist angekommen. Wir melden uns innerhalb eines Werktags.";
+          showDone(false);
+        })
+        .catch(function () {
+          submit.disabled = false;
+          err.textContent = "Das hat nicht geklappt. Bitte ruft kurz an oder schreibt an " + MAIL_TO + ".";
+        });
+      return;
+    }
+
+    openMail("mailto:" + MAIL_TO + "?subject=" + encodeURIComponent(subject) +
+      "&body=" + encodeURIComponent(lines.join("\n")));
+    showDone(true);
+  });
+
+  // Fallback for practice PCs without a mail app: copy the finished message, or go back with all entries kept.
+  document.getElementById("copyBtn").addEventListener("click", function () {
+    var ta = document.getElementById("copyText");
+    var st = document.getElementById("copyStatus");
+    function ok() { st.textContent = "Kopiert. Jetzt in eine neue E-Mail an " + MAIL_TO + " einfügen."; }
+    function manual() { ta.focus(); ta.select(); st.textContent = "Text ist markiert: bitte mit Strg+C bzw. ⌘+C kopieren."; }
+    try {
+      if (navigator.clipboard && window.isSecureContext) {
+        navigator.clipboard.writeText(ta.value).then(ok, function () {
+          ta.select();
+          try { if (document.execCommand("copy")) { ok(); return; } } catch (e) { /* fall through */ }
+          manual();
+        });
+      } else {
+        ta.select();
+        if (document.execCommand("copy")) ok(); else manual();
+      }
+    } catch (e) { manual(); }
+  });
+  document.getElementById("backBtn").addEventListener("click", function () {
+    document.getElementById("done").classList.remove("show");
+    form.style.display = "";
+    submit.disabled = false;
+    form.scrollIntoView({ behavior: "smooth", block: "start" });
+  });
+
+  syncKind();
+  render();
+})();
+</script>
+</body>
+</html>
